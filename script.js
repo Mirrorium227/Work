@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Orange Cat Cloud Monitor Script v1.5 Loaded');
+    console.log('Orange Cat Cloud Monitor Script v1.7 Loaded');
     fetchLogs();
     fetchWork();
 });
@@ -93,11 +93,12 @@ function renderLogs(logs, container) {
             }
 
             // Check for Status Update
-            // Keywords: 进行中, 已完成, 已全部完成, 未开始, 失败, 无法进行, 放弃
+            // Keywords: 进行中, 已完成, 已全部完成, 未开始, 失败, 无法进行, 放弃, 开始, 重启, 恢复
             // Also accept percentages like "50%"
-            const statusKeywords = ['已完成', '已全部完成', '未开始', '进行中', '失败', '无法进行', '放弃'];
+            const statusKeywords = ['已完成', '已全部完成', '未开始', '进行中', '失败', '无法进行', '放弃', '开始', '重启', '恢复'];
             const successKeywords = ['已完成', '已全部完成'];
             const failureKeywords = ['失败', '无法进行', '放弃'];
+            const restartKeywords = ['开始', '重启', '恢复'];
             
             const isPercentage = /^\d+%$/.test(entry.message);
             const isStatusMsg = statusKeywords.some(kw => entry.message.includes(kw)) || isPercentage;
@@ -123,6 +124,8 @@ function renderLogs(logs, container) {
                     statusColorClass = 'status-success';
                 } else if (failureKeywords.some(kw => entry.message.includes(kw))) {
                     statusColorClass = 'status-failure';
+                } else if (restartKeywords.some(kw => entry.message.includes(kw))) {
+                    statusColorClass = 'status-restart';
                 }
             }
 

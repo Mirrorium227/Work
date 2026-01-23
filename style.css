@@ -237,6 +237,10 @@ body {
     color: #E57373 !important; /* Light Red */
 }
 
+.log-message.status-restart {
+    color: #F1C40F !important; /* Yellow */
+}
+
 /* Mini context badge for status updates */
 .log-item-wrapper.status-update .log-context {
     font-size: 0.75rem; /* Slightly larger for readability */
