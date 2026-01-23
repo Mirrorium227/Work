@@ -189,11 +189,75 @@ body {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    cursor: pointer; /* Whole wrapper is now clickable */
 }
 
 .log-item-wrapper:hover {
     background: rgba(0,0,0,0.25);
     transform: translateX(5px);
+}
+
+/* Status Update Style (Zsh-like inheritance) */
+.log-item-wrapper.status-update {
+    flex-direction: row;
+    align-items: center;
+    background: transparent;
+    border-left: none;
+    padding: 4px 0 4px 10px;
+    margin-top: -8px; /* Pull closer to previous entry */
+    margin-bottom: 8px;
+    gap: 8px;
+}
+
+.log-item-wrapper.status-update:hover {
+    background: rgba(255,255,255,0.02);
+    transform: translateX(5px);
+}
+
+.status-connector {
+    color: var(--text-muted);
+    font-family: monospace;
+    font-size: 1.2rem;
+    line-height: 1;
+    opacity: 0.7;
+}
+
+.log-item-wrapper.status-update .log-message {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Status Colors for Log Messages */
+.log-message.status-success {
+    color: #81C784 !important; /* Light Green */
+}
+
+.log-message.status-failure {
+    color: #E57373 !important; /* Light Red */
+}
+
+/* Mini context badge for status updates */
+.log-item-wrapper.status-update .log-context {
+    font-size: 0.75rem; /* Slightly larger for readability */
+    padding: 1px 8px;
+    align-self: center; /* Align vertically with text */
+    margin: 0; /* Remove default margins if any */
+    opacity: 1; /* Fully opaque for clarity */
+    transform: none; /* Reset hover transform */
+    
+    /* User request: Grey Italic Font */
+    color: var(--text-muted);
+    font-style: italic;
+    font-weight: 400; /* Normal weight */
+    
+    /* Keep background from ctx class, but maybe adjust border */
+    border-left-width: 2px; 
+}
+
+.log-item-wrapper.status-update .log-context:hover {
+    transform: scale(1.02); /* Subtle interaction */
+    opacity: 1;
 }
 
 .log-context {

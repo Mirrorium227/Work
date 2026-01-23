@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Orange Cat Cloud Monitor Script v1.1 Loaded');
+    console.log('Orange Cat Cloud Monitor Script v1.5 Loaded');
     fetchLogs();
     fetchWork();
 });
@@ -81,6 +81,8 @@ function renderLogs(logs, container) {
         const logEntry = document.createElement('div');
         logEntry.className = 'log-entry';
         
+        let lastContext = null;
+
         const itemsHtml = log.entries.map(entry => {
             let contextClass = '';
             if (entry.context) {
@@ -90,14 +92,57 @@ function renderLogs(logs, container) {
                 else if (entry.context === '🐱') contextClass = 'ctx-cat';
             }
 
+            // Check for Status Update
+            // Keywords: 进行中, 已完成, 已全部完成, 未开始, 失败, 无法进行, 放弃
+            // Also accept percentages like "50%"
+            const statusKeywords = ['已完成', '已全部完成', '未开始', '进行中', '失败', '无法进行', '放弃'];
+            const successKeywords = ['已完成', '已全部完成'];
+            const failureKeywords = ['失败', '无法进行', '放弃'];
+            
+            const isPercentage = /^\d+%$/.test(entry.message);
+            const isStatusMsg = statusKeywords.some(kw => entry.message.includes(kw)) || isPercentage;
+            
+            // Determine relation to previous context
+            // We want to group if:
+            // 1. Exact match
+            // 2. Parent -> Child (e.g. "Proj" -> "Proj.Sub")
+            // 3. Siblings (e.g. "Proj.Sub1" -> "Proj.Sub2")
+            const isRelatedContext = areContextsRelated(lastContext, entry.context);
+            
+            const isStatusUpdate = isStatusMsg && isRelatedContext;
+            
+            // Update lastContext strictly to current for next iteration
+            // But for visual grouping, we might want to track the "Active Root"?
+            // Actually, the simple sibling check in areContextsRelated should suffice for linear scanning.
+            lastContext = entry.context;
+
+            // Determine status color class
+            let statusColorClass = '';
+            if (isStatusUpdate) {
+                if (successKeywords.some(kw => entry.message.includes(kw))) {
+                    statusColorClass = 'status-success';
+                } else if (failureKeywords.some(kw => entry.message.includes(kw))) {
+                    statusColorClass = 'status-failure';
+                }
+            }
+
+            // Always render context, but style it differently for status updates
             const contextHtml = entry.context 
                 ? `<div class="log-context ${contextClass}">${entry.context}</div>` 
                 : '';
             
+            const connectorHtml = isStatusUpdate 
+                ? `<span class="status-connector">└──</span>` 
+                : '';
+
+            const wrapperClass = isStatusUpdate ? 'log-item-wrapper status-update' : 'log-item-wrapper';
+            const messageClass = `log-message ${statusColorClass}`;
+            
             return `
-                <div class="log-item-wrapper">
+                <div class="${wrapperClass}" data-context="${entry.context}">
+                    ${connectorHtml}
                     ${contextHtml}
-                    <div class="log-message">${entry.message}</div>
+                    <div class="${messageClass}">${entry.message}</div>
                 </div>
             `;
         }).join('');
@@ -109,17 +154,65 @@ function renderLogs(logs, container) {
             </div>
         `;
         
-        // Add click handlers to contexts
-        const contexts = logEntry.querySelectorAll('.log-context');
-        contexts.forEach(ctx => {
-            ctx.addEventListener('click', (e) => {
-                const text = e.target.textContent.trim();
-                handleContextClick(text);
+        // Add click handlers to the wrapper
+        const wrappers = logEntry.querySelectorAll('.log-item-wrapper');
+        wrappers.forEach(wrapper => {
+            wrapper.addEventListener('click', (e) => {
+                const text = wrapper.getAttribute('data-context');
+                if (text && text !== 'undefined') {
+                    handleContextClick(text);
+                }
             });
         });
 
         container.appendChild(logEntry);
     });
+}
+
+function areContextsRelated(prev, curr) {
+    if (!prev || !curr) return false;
+    if (prev === curr) return true;
+
+    // Normalize separators to dots for easier handling
+    const nPrev = prev.replace(/:/g, '.');
+    const nCurr = curr.replace(/:/g, '.');
+
+    // 1. Parent -> Child relationship (Curr starts with Prev)
+    if (nCurr.startsWith(nPrev + '.')) return true;
+
+    // 2. Child -> Parent relationship (Prev starts with Curr - rare but possible in logs)
+    // Actually, usually status updates go down or stay level. 
+    // If we go back up to parent, we might not want to indent? 
+    // User wants "Status Log" recognition. "无法进行" implies result of a task.
+    // Let's stick to Parent->Child or Sibling.
+
+    // 3. Siblings (Share same parent)
+    const getParent = (s) => {
+        const lastDot = s.lastIndexOf('.');
+        return lastDot === -1 ? null : s.substring(0, lastDot);
+    };
+
+    const pPrev = getParent(nPrev);
+    const pCurr = getParent(nCurr);
+
+    // If both have parents and parents are same
+    if (pPrev && pCurr && pPrev === pCurr) return true;
+    
+    // Also handle "Grandchild" skipping or fuzzy matching?
+    // Let's rely on common prefix length being significant?
+    // User Example: "项目:挑战杯:自动驾驶" vs "项目:挑战杯:自动驾驶.测试实车"
+    // nPrev = "项目.挑战杯.自动驾驶"
+    // nCurr = "项目.挑战杯.自动驾驶.测试实车"
+    // nCurr starts with nPrev. Matches Case 1.
+
+    // User Example 2 (Siblings):
+    // Prev: "项目:挑战杯:自动驾驶.测试实车" (nPrev = ...自动驾驶.测试实车)
+    // Curr: "项目:挑战杯:自动驾驶.PID与ROS" (nCurr = ...自动驾驶.PID与ROS)
+    // pPrev = "...自动驾驶"
+    // pCurr = "...自动驾驶"
+    // Match Case 3.
+
+    return false;
 }
 
 function handleContextClick(contextText) {
@@ -172,8 +265,8 @@ function scrollToCard(card) {
         // Vertical layout: Body scrolls
         card.scrollIntoView({ behavior: 'smooth', block: 'center' });
         
-        // Add a highlight flash
-        flashHighlight(card);
+        // Add a highlight flash with longer duration for vertical scroll
+        flashHighlight(card, 5000);
     } else {
         // Horizontal layout: Project container scrolls
         // The scrollable container IS the #projects-container (which has .panel-content class)
@@ -200,12 +293,12 @@ function scrollToCard(card) {
                 behavior: 'smooth'
             });
             
-            flashHighlight(card);
+            flashHighlight(card, 800);
         }
     }
 }
 
-function flashHighlight(element) {
+function flashHighlight(element, duration = 600) {
     // Add a temporary highlight class or inline style
     const originalTransition = element.style.transition;
     const originalShadow = element.style.boxShadow;
@@ -215,14 +308,19 @@ function flashHighlight(element) {
     element.style.boxShadow = '0 0 20px var(--primary-orange)';
     element.style.transform = 'scale(1.02)';
     
+    // Calculate fade out start time
+    // We want the highlight to stay for most of the duration, then fade out
+    const fadeOutDuration = 300;
+    const holdDuration = Math.max(0, duration - fadeOutDuration);
+
     setTimeout(() => {
         element.style.boxShadow = originalShadow;
         element.style.transform = originalTransform;
         
         setTimeout(() => {
             element.style.transition = originalTransition;
-        }, 300);
-    }, 600);
+        }, fadeOutDuration);
+    }, holdDuration);
 }
 
 function parseWork(text) {
