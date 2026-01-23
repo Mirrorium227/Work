@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('Orange Cat Cloud Monitor Script v1.1 Loaded');
     fetchLogs();
     fetchWork();
 });
@@ -107,8 +108,121 @@ function renderLogs(logs, container) {
                 ${itemsHtml}
             </div>
         `;
+        
+        // Add click handlers to contexts
+        const contexts = logEntry.querySelectorAll('.log-context');
+        contexts.forEach(ctx => {
+            ctx.addEventListener('click', (e) => {
+                const text = e.target.textContent.trim();
+                handleContextClick(text);
+            });
+        });
+
         container.appendChild(logEntry);
     });
+}
+
+function handleContextClick(contextText) {
+    console.log('Clicked context:', contextText);
+    const cards = document.querySelectorAll('.project-card');
+    let bestMatch = null;
+    let maxLen = -1;
+
+    // Normalize context for matching: 
+    // 1. Replace dots with colons
+    // 2. Remove all whitespace (to handle "Type: Name" vs "Type:Name")
+    const normalizedContext = contextText.replace(/\./g, ':').replace(/\s+/g, '');
+
+    cards.forEach(card => {
+        const type = card.getAttribute('data-type');
+        const name = card.getAttribute('data-name');
+        
+        // Construct full key and normalize
+        const fullKey = `${type}:${name}`;
+        const normalizedKey = fullKey.replace(/\./g, ':').replace(/\s+/g, '');
+
+        // Check if normalized context starts with normalized key
+        if (normalizedContext.startsWith(normalizedKey)) {
+            // Check boundary
+            const rest = normalizedContext.substring(normalizedKey.length);
+            // Valid separators after match: end of string, or ':' (since we normalized '.' to ':')
+            if (rest.length === 0 || rest.startsWith(':')) {
+                if (normalizedKey.length > maxLen) {
+                    maxLen = normalizedKey.length;
+                    bestMatch = card;
+                }
+            }
+        }
+    });
+
+    if (bestMatch) {
+        console.log('Match found:', bestMatch.getAttribute('data-name'));
+        scrollToCard(bestMatch);
+    } else {
+        console.log('No match found for:', contextText);
+        console.log('Normalized context:', normalizedContext);
+    }
+}
+
+function scrollToCard(card) {
+    // Check layout mode
+    const isVertical = window.matchMedia("(max-aspect-ratio: 1/1)").matches;
+
+    if (isVertical) {
+        // Vertical layout: Body scrolls
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Add a highlight flash
+        flashHighlight(card);
+    } else {
+        // Horizontal layout: Project container scrolls
+        // The scrollable container IS the #projects-container (which has .panel-content class)
+        const container = document.getElementById('projects-container');
+        
+        if (container) {
+            // Calculate position to scroll to
+            // We want the card to be near the top, but with some padding (e.g. 20px)
+            // Or centered if possible. Let's aim for 20px from top of container.
+            
+            // Current scroll position
+            const containerScrollTop = container.scrollTop;
+            
+            // Distance from card top to container top
+            const cardRect = card.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            
+            const relativeTop = cardRect.top - containerRect.top;
+            
+            const targetScrollTop = containerScrollTop + relativeTop - 20; // 20px padding
+            
+            container.scrollTo({
+                top: targetScrollTop,
+                behavior: 'smooth'
+            });
+            
+            flashHighlight(card);
+        }
+    }
+}
+
+function flashHighlight(element) {
+    // Add a temporary highlight class or inline style
+    const originalTransition = element.style.transition;
+    const originalShadow = element.style.boxShadow;
+    const originalTransform = element.style.transform;
+    
+    element.style.transition = 'all 0.3s ease';
+    element.style.boxShadow = '0 0 20px var(--primary-orange)';
+    element.style.transform = 'scale(1.02)';
+    
+    setTimeout(() => {
+        element.style.boxShadow = originalShadow;
+        element.style.transform = originalTransform;
+        
+        setTimeout(() => {
+            element.style.transition = originalTransition;
+        }, 300);
+    }, 600);
 }
 
 function parseWork(text) {
@@ -116,9 +230,10 @@ function parseWork(text) {
     const projects = [];
     let currentProject = null;
 
-    // Regex to capture Type (up to first colon) and Name (rest)
+    // Regex to capture Type (up to first colon or dot) and Name (rest)
     // Supports nested colons in Name (e.g. "Type:Name:SubName{")
-    const headerRegex = /^([^:]+):(.+)\{$/;
+    // Now also supports dot separator for cases like "任务.Name{"
+    const headerRegex = /^([^:.]+)(?::|\.)(.+)\{$/;
     const endRegex = /^\s*\}$/;
 
     lines.forEach(line => {
@@ -202,6 +317,9 @@ function renderProjects(projects, container) {
     projects.forEach(project => {
         const card = document.createElement('div');
         card.className = 'project-card';
+        // Add data attributes for linking
+        card.setAttribute('data-type', project.type);
+        card.setAttribute('data-name', project.name);
         
         // Header Style based on Type
         let headerClass = '';
