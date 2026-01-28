@@ -89,4 +89,11 @@
 项目:前端与计算机网络:橙猫猫博客.网络:已完成
 天哪，这个破网络焦头烂额3个月总算能用了
 
+2026.01.27
+项目:前端与计算机网络:橙猫猫博客.网络:又不行了，我真服了
+项目:前端与计算机网络:橙猫猫博客.网络:现在blogpreviewcn2.mirrorium.top用了enhanced-FaaS-in-China的verlify-cname.xingpingcn.top，总觉得cf的似乎全国更深绿一些，可这个回退源总是报错，用一晚上把blog.mirrorium.top这个域名放在CheapName上，过几天再反代回来用SaaS再试试
+项目:前端与计算机网络:橙猫猫博客.网络:无法进行
 
+任务:原神.挪德卡莱满探索:做完了6.0全部的世界任务
+
+任务:Tailscale可信设备组网:Mirrorium_R7800路由器成功上线
