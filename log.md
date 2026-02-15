@@ -237,3 +237,10 @@ btw，我真的不想在家里呆着，我宁愿去学校或者给自己找个�
 项目:挑战杯:自动驾驶.超图神经网络HyperACE:HyperACE (YOLOv13)是输入特征 → AdaHyperedgeGen → 动态 A → AdaHGConv → 增强特征，优点超图结构从数据中自动学习，每张图片不同
 
 项目:挑战杯:自动驾驶.超图神经网络HyperACE:YOLOv13 的 FullPAD_Tunnel也使用了类似的门控机制，这里不用改
+
+项目:挑战杯:自动驾驶.模型训练:my_interp CUDA 扩展已编译，以适配原有train的设计
+项目:挑战杯:自动驾驶.模型训练:创建了train_hyperace.py作为微调后的训练脚本，学习率0.005，15个epoch，使用model/culane_res18.pth完整预训练权重
+项目:挑战杯:自动驾驶.模型训练:运行scripts/cache_culane_ponits.py --root /data/UFLD/CULane生成culane_anno_cache.json(暂时没发现用处但train没这个报错)
+项目:挑战杯:自动驾驶.模型训练:np.float在新版NumPy中已移除，改为float，评估工具Makefile缺少OpenCV4 include路径，NCLUDE_DIRS加上/usr/include/opencv4解决了
+项目:挑战杯:自动驾驶.模型训练:my_interp目录遮蔽编译好的C扩展，但my_interp.run不存在，编译的.so复制到项目根目录解决(需先import torch再import my_interp)
+项目:挑战杯:自动驾驶.模型训练:缓存已生成(226MB), 2026.02.16 00:10已经启动训练
