@@ -232,8 +232,8 @@ btw，我真的不想在家里呆着，我宁愿去学校或者给自己找个�
 
 2026.02.15
 
-项目:挑战杯:自动驾驶.超图神经网络HyperACE:HGNN (我们之前写的):固定 H → 谱卷积 (D_v^{-1/2} H W D_e^{-1} H^T D_v^{-1/2} X Θ),缺点: 超图结构写死，无法适应不同输入
+项目:挑战杯:自动驾驶.超图神经网络HyperACE:HGNN (我们之前写的)是固定 H → 谱卷积 (D_v^{-1/2} H W D_e^{-1} H^T D_v^{-1/2} X Θ),缺点超图结构写死，无法适应不同输入
 
-项目:挑战杯:自动驾驶.超图神经网络HyperACE:HyperACE (YOLOv13)是输入特征 → AdaHyperedgeGen → 动态 A → AdaHGConv → 增强特征，优点: 超图结构从数据中自动学习，每张图片不同
+项目:挑战杯:自动驾驶.超图神经网络HyperACE:HyperACE (YOLOv13)是输入特征 → AdaHyperedgeGen → 动态 A → AdaHGConv → 增强特征，优点超图结构从数据中自动学习，每张图片不同
 
 项目:挑战杯:自动驾驶.超图神经网络HyperACE:YOLOv13 的 FullPAD_Tunnel也使用了类似的门控机制，这里不用改
