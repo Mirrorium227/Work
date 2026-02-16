@@ -243,4 +243,20 @@ btw，我真的不想在家里呆着，我宁愿去学校或者给自己找个�
 项目:挑战杯:自动驾驶.模型训练:运行scripts/cache_culane_ponits.py --root /data/UFLD/CULane生成culane_anno_cache.json(暂时没发现用处但train没这个报错)
 项目:挑战杯:自动驾驶.模型训练:np.float在新版NumPy中已移除，改为float，评估工具Makefile缺少OpenCV4 include路径，NCLUDE_DIRS加上/usr/include/opencv4解决了
 项目:挑战杯:自动驾驶.模型训练:my_interp目录遮蔽编译好的C扩展，但my_interp.run不存在，编译的.so复制到项目根目录解决(需先import torch再import my_interp)
-项目:挑战杯:自动驾驶.模型训练:缓存已生成(226MB), 2026.02.16 00:10已经启动训练
+项目:挑战杯:自动驾驶.模型训练:缓存已生成(226MB), 2026.02.16 0010已经启动训练
+
+2026.02.16
+项目:挑战杯:自动驾驶.模型训练:HGv1训练完成(约6.5小时)，最佳F-measure 0.7542(Epoch 4)，比原始UFLDv2 ResNet18基线(0.750)提升+0.42个百分点
+项目:挑战杯:自动驾驶.模型训练:9个CULane测试场景均有评估，normal场景0.9234最高，cross场景0.0(无车道线)，15个epoch中波动范围仅0.7531~0.7542说明已充分收敛
+项目:挑战杯:自动驾驶.模型训练:训练保存的checkpoint为1.6GB是因为包含了optimizer状态，去掉后精简为799MB，与官方788MB仅差11MB(=HyperACE新增参数)
+项目:挑战杯:自动驾驶.模型训练:使用demo.py对新模型生成9个场景的可视化视频，效果正常，命名为UFLD-HGv1，清理无关文件后上传至GitHub(Mirrorium227/UFLD-HyperGraphEnhanced)，分支UFLD-HGv1(MLP)，MIT License(https://github.com/Mirrorium227/UFLD-HyperGraphEnhanced)
+
+项目:挑战杯:自动驾驶.模型测试:确认Jetson Orin Nano部署方案：FP32训练→ONNX导出→TensorRT FP16
+
+项目:挑战杯:自动驾驶.超图神经网络HyperACE:设计并实现HGv2(空间特征超图)，将超图从MLP中间层(4车道×512维)移到backbone输出特征图(500空间位置×128维)，HGv2新增参数仅199K(占总参数0.10%)，比HGv1的2.9M轻15倍，但作用于信息更丰富的空间特征图
+项目:挑战杯:自动驾驶.超图神经网络HyperACE:HGv2架构即Conv1×1降维→16个可学习超边原型+4头注意力生成参与度矩阵→超图卷积(聚合+分发+度归一化)→Conv1×1升维→门控残差，HGv2冻结策略改为只冻backbone，pool层需要可训练因为空间超图在pool之前改变了特征
+
+项目:挑战杯:自动驾驶.超图神经网络HyperACE:HGv2全部测试通过，独立模块gate=0完美透传、完整模型forward+TTA正确、预训练权重128 keys加载+12个spatial_hg新key
+项目:挑战杯:自动驾驶.超图神经网络HyperACE:HGv1证明了超图在UFLD上的可行性(+0.42pp)，HGv2将超图从"车道间交互"升级为"空间特征增强"，在空间信息丢失之前就进行超图卷积
+
+项目:挑战杯:自动驾驶.模型训练:启动HGv2训练，对比HGv1的F-measure看空间级超图是否优于MLP级超图
