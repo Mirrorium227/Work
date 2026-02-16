@@ -249,7 +249,7 @@ btw，我真的不想在家里呆着，我宁愿去学校或者给自己找个�
 项目:挑战杯:自动驾驶.模型训练:HGv1训练完成(约6.5小时)，最佳F-measure 0.7542(Epoch 4)，比原始UFLDv2 ResNet18基线(0.750)提升+0.42个百分点
 项目:挑战杯:自动驾驶.模型训练:9个CULane测试场景均有评估，normal场景0.9234最高，cross场景0.0(无车道线)，15个epoch中波动范围仅0.7531~0.7542说明已充分收敛
 项目:挑战杯:自动驾驶.模型训练:训练保存的checkpoint为1.6GB是因为包含了optimizer状态，去掉后精简为799MB，与官方788MB仅差11MB(=HyperACE新增参数)
-项目:挑战杯:自动驾驶.模型训练:使用demo.py对新模型生成9个场景的可视化视频，效果正常，命名为UFLD-HGv1，清理无关文件后上传至GitHub(Mirrorium227/UFLD-HyperGraphEnhanced)，分支UFLD-HGv1(MLP)，MIT License(https://github.com/Mirrorium227/UFLD-HyperGraphEnhanced)
+项目:挑战杯:自动驾驶.模型训练:使用demo.py对新模型生成9个场景的可视化视频，效果正常，命名为UFLD-HGv1，清理无关文件后上传至GitHub(Mirrorium227/UFLD-HyperGraphEnhanced)，分支UFLD-HGv1(MLP)，MIT License(github.com/Mirrorium227/UFLD-HyperGraphEnhanced)
 
 项目:挑战杯:自动驾驶.模型测试:确认Jetson Orin Nano部署方案：FP32训练→ONNX导出→TensorRT FP16
 
