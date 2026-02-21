@@ -95,10 +95,10 @@ function renderLogs(logs, container) {
             // Check for Status Update
             // Keywords: 进行中, 已完成, 已全部完成, 未开始, 失败, 无法进行, 放弃, 开始, 重启, 恢复
             // Also accept percentages like "50%"
-            const statusKeywords = ['已完成', '已全部完成', '未开始', '进行中', '失败', '无法进行', '放弃', '开始', '重启', '恢复'];
+            const statusKeywords = ['已完成', '已全部完成', '未开始', '进行中', '失败', '无法进行', '放弃', '重启', '恢复'];
             const successKeywords = ['已完成', '已全部完成'];
             const failureKeywords = ['失败', '无法进行', '放弃'];
-            const restartKeywords = ['开始', '重启', '恢复'];
+            const restartKeywords = ['重启', '恢复'];
             
             const isPercentage = /^\d+%$/.test(entry.message);
             const isStatusMsg = statusKeywords.some(kw => entry.message.includes(kw)) || isPercentage;
